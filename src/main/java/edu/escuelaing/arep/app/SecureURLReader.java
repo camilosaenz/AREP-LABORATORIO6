@@ -3,6 +3,7 @@ package edu.escuelaing.arep.app;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
@@ -20,9 +21,11 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 public class SecureURLReader {
-
+	
+	/**
 	public static void main(String...args) throws IOException, KeyManagementException, NoSuchAlgorithmException, CertificateException, KeyStoreException {
 		// Create a file and a password representation
 		 File trustStoreFile = new File("keycerts/myTrustStore");
@@ -49,8 +52,38 @@ public class SecureURLReader {
 		 readURL("https://www.google.com");
 		
 	}
+	*/
+	
+    public static void Secure() {
+        try {
+        	File trustStoreFile = new File("keycerts/myTrustStore");
+        	char[] trustStorePassword = "arep2021".toCharArray();
+            KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
+            trustStore.load(new FileInputStream(trustStoreFile), trustStorePassword);
+            TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+            tmf.init(trustStore);
+            for(TrustManager t: tmf.getTrustManagers()){
+                System.out.println(t);
+            }
+            SSLContext sslContext = SSLContext.getInstance("TLS");
+            sslContext.init(null, tmf.getTrustManagers(), null);
+            SSLContext.setDefault(sslContext);
+        } catch (KeyStoreException ex) {
+            Logger.getLogger(SecureURLReader.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(SecureURLReader.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(SecureURLReader.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (NoSuchAlgorithmException ex) {
+            Logger.getLogger(SecureURLReader.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (CertificateException ex) {
+            Logger.getLogger(SecureURLReader.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (KeyManagementException ex) {
+            Logger.getLogger(SecureURLReader.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
 
-	public static void readURL(String path) throws IOException {
+	public static String readURL(String path) throws IOException {
 		// Crea el objeto que representa una URL
 		URL siteURL=null;
 		try {
@@ -88,5 +121,6 @@ public class SecureURLReader {
 		} catch (IOException x) {
 		System.err.println(x);
 		}
+		return "";
 	}
 }
